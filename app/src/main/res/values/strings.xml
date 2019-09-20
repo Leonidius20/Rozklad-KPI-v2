@@ -3,6 +3,11 @@
     <string name="user_preference_notification_delay_key" translatable="false">notification_delay_key</string>
     <string name="user_preference_show_notification_key" translatable="false">show_notification_key</string>
     <string name="user_preference_reverse_week_key" translatable="false">reverse_week_key</string>
+    <string name="user_preference_alarm_switch" translatable="false">alarm_switch</string>
+    <string name="user_preference_first_lesson_time" translatable="false">first_lesson_time</string>
+    <string name="user_preference_second_lesson_time" translatable="false">second_lesson_time</string>
+    <string name="user_preference_third_lesson_time" translatable="false">third_lesson_time</string>
+    <string name="user_preference_fourth_lesson_time" translatable="false">fourth_lesson_time</string>
     <string name="update_timetable_key" translatable="false">update_timetable_key</string>
     <string name="change_group_key" translatable="false">change_group_key</string>
 

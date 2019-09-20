@@ -4,8 +4,9 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
-import androidx.preference.Preference
-import androidx.preference.PreferenceFragmentCompat
+import android.widget.Toast
+import androidx.fragment.app.FragmentManager
+import androidx.preference.*
 import com.goldenpiedevs.schedule.app.R
 import com.goldenpiedevs.schedule.app.ScheduleApplication
 import com.goldenpiedevs.schedule.app.core.api.lessons.LessonsManager
@@ -26,7 +27,7 @@ import org.jetbrains.anko.toast
 import javax.inject.Inject
 
 
-class ApplicationPreferenceFragment : PreferenceFragmentCompat() {
+class ApplicationPreferenceFragment : PreferenceFragmentCompat(), DialogPreference.TargetFragment {
 
     @Inject
     lateinit var notificationManager: NotificationManager
@@ -45,7 +46,7 @@ class ApplicationPreferenceFragment : PreferenceFragmentCompat() {
         preferenceManager.sharedPreferencesName = getString(R.string.user_preference_file_name)
         addPreferencesFromResource(R.xml.app_preference)
 
-        findPreference(getString(R.string.user_preference_notification_delay_key)).apply {
+        findPreference<ListPreference>(getString(R.string.user_preference_notification_delay_key))!!.apply {
             summary = "${UserPreference.notificationDelay} ${getString(R.string.min)}"
 
             onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, value ->
@@ -57,26 +58,26 @@ class ApplicationPreferenceFragment : PreferenceFragmentCompat() {
             }
         }
 
-        findPreference(getString(R.string.change_group_key)).apply {
+        findPreference<Preference>(getString(R.string.change_group_key))!!.apply {
             setOnPreferenceClickListener {
                 startActivityForResult(Intent(context, ChooseGroupActivity::class.java), CHANGE_GROUP_CODE)
                 true
             }
         }
 
-        findPreference(getString(R.string.user_preference_reverse_week_key)).apply {
+        findPreference<SwitchPreference>(getString(R.string.user_preference_reverse_week_key))!!.apply {
             onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, value ->
                 UserPreference.reverseWeek = value.toString().toBoolean()
-                ScheduleWidgetProvider.updateWidget(context)
+                ScheduleWidgetProvider.updateWidget(context!!)
 
                 Handler().postDelayed({
-                    context.restartApp()
+                    context!!.restartApp()
                 }, 200)
                 true
             }
         }
 
-        findPreference(getString(R.string.update_timetable_key)).apply {
+        findPreference<Preference>(getString(R.string.update_timetable_key))!!.apply {
             setOnPreferenceClickListener {
 
                 if (!context.isNetworkAvailable()) {
@@ -98,6 +99,11 @@ class ApplicationPreferenceFragment : PreferenceFragmentCompat() {
                 true
             }
         }
+
+        findPreference<TimePickerPreference>(getString(R.string.user_preference_first_lesson_time))!!.summary = UserPreference.firstLessonTime
+        findPreference<TimePickerPreference>(getString(R.string.user_preference_second_lesson_time))!!.summary = UserPreference.secondLessonTime
+        findPreference<TimePickerPreference>(getString(R.string.user_preference_third_lesson_time))!!.summary = UserPreference.thirdLessonTime
+        findPreference<TimePickerPreference>(getString(R.string.user_preference_fourth_lesson_time))!!.summary = UserPreference.fourthLessonTime
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -111,5 +117,17 @@ class ApplicationPreferenceFragment : PreferenceFragmentCompat() {
             }
         }
         super.onActivityResult(requestCode, resultCode, data)
+    }
+
+    override fun onDisplayPreferenceDialog(preference: Preference?) {
+        if (preference != null && preference !is TimePickerPreference) {
+            super.onDisplayPreferenceDialog(preference)
+        } else {
+            val dialog = TimePickerDialogFragment.getInstance(preference?.key)
+            dialog.setTargetFragment(this, 0)
+            if (fragmentManager != null) {
+                dialog.show(fragmentManager as FragmentManager, "TimePickerDialog")
+            } else Toast.makeText(context, "ERROR", Toast.LENGTH_SHORT).show()
+        }
     }
 }
