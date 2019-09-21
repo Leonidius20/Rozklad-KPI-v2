@@ -4,8 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
-import android.widget.Toast
-import androidx.fragment.app.FragmentManager
 import androidx.preference.*
 import com.goldenpiedevs.schedule.app.R
 import com.goldenpiedevs.schedule.app.ScheduleApplication
@@ -19,11 +17,14 @@ import com.goldenpiedevs.schedule.app.core.utils.util.isNetworkAvailable
 import com.goldenpiedevs.schedule.app.core.utils.util.restartApp
 import com.goldenpiedevs.schedule.app.ui.choose.group.ChooseGroupActivity
 import com.goldenpiedevs.schedule.app.ui.widget.ScheduleWidgetProvider
+import com.wdullaer.materialdatetimepicker.time.TimePickerDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.indeterminateProgressDialog
 import org.jetbrains.anko.toast
+import java.text.DateFormat
+import java.util.*
 import javax.inject.Inject
 
 
@@ -100,10 +101,39 @@ class ApplicationPreferenceFragment : PreferenceFragmentCompat(), DialogPreferen
             }
         }
 
-        findPreference<TimePickerPreference>(getString(R.string.user_preference_first_lesson_time))!!.summary = UserPreference.firstLessonTime
-        findPreference<TimePickerPreference>(getString(R.string.user_preference_second_lesson_time))!!.summary = UserPreference.secondLessonTime
-        findPreference<TimePickerPreference>(getString(R.string.user_preference_third_lesson_time))!!.summary = UserPreference.thirdLessonTime
-        findPreference<TimePickerPreference>(getString(R.string.user_preference_fourth_lesson_time))!!.summary = UserPreference.fourthLessonTime
+        findPreference<SwitchPreferenceCompat>(getString(R.string.user_preference_alarm_switch))!!.apply {
+            onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, value ->
+                // TODO ("Schedule or cancel alarm clocks in AlarmClockManager")
+                return@OnPreferenceChangeListener true
+            }
+        }
+
+        applySummaryAndListener(findPreference(getString(R.string.user_preference_first_lesson_time))!!)
+        applySummaryAndListener(findPreference(getString(R.string.user_preference_second_lesson_time))!!)
+        applySummaryAndListener(findPreference(getString(R.string.user_preference_third_lesson_time))!!)
+        applySummaryAndListener(findPreference(getString(R.string.user_preference_fourth_lesson_time))!!)
+    }
+
+    // Applies summaries and OnClickListeners to alarm clock's time preferences
+    private fun applySummaryAndListener(pref: Preference) {
+        pref.apply {
+            var currentStoredTime = UserPreference.preferences.getInt(pref.key, 420)
+
+            summary = formatTime(currentStoredTime)
+
+            onPreferenceClickListener = Preference.OnPreferenceClickListener {
+                val hours = currentStoredTime / 60
+                val minutes = currentStoredTime % 60
+                TimePickerDialog.newInstance({ _, hourOfDay, minute, _ ->
+                    val time = hourOfDay * 60 + minute
+                    UserPreference.preferences.edit().putInt(pref.key, time).apply()
+                    summary = formatTime(time)
+                    currentStoredTime = time // updating for future launches of dialog
+                    // TODO: AlarmManager.updateAlarmClocks()
+                }, hours, minutes, true).show(childFragmentManager, "TimePickerDialog")
+                return@OnPreferenceClickListener true
+            }
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -119,15 +149,15 @@ class ApplicationPreferenceFragment : PreferenceFragmentCompat(), DialogPreferen
         super.onActivityResult(requestCode, resultCode, data)
     }
 
-    override fun onDisplayPreferenceDialog(preference: Preference?) {
-        if (preference != null && preference !is TimePickerPreference) {
-            super.onDisplayPreferenceDialog(preference)
-        } else {
-            val dialog = TimePickerDialogFragment.getInstance(preference?.key)
-            dialog.setTargetFragment(this, 0)
-            if (fragmentManager != null) {
-                dialog.show(fragmentManager as FragmentManager, "TimePickerDialog")
-            } else Toast.makeText(context, "ERROR", Toast.LENGTH_SHORT).show()
-        }
+    /**
+     * Takes time in minutes and outputs time in HH:mm format
+     */
+    private fun formatTime(timeInMinutes: Int) : String {
+        val hours : Int = timeInMinutes / 60
+        val minutes : Int = timeInMinutes % 60
+        val calendar : Calendar = Calendar.getInstance()
+        calendar.set(Calendar.HOUR_OF_DAY, hours)
+        calendar.set(Calendar.MINUTE, minutes)
+        return DateFormat.getTimeInstance(DateFormat.SHORT, Locale.getDefault()).format(calendar.time)
     }
 }

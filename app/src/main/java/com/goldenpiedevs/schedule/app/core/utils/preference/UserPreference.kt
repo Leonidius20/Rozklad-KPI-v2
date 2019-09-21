@@ -10,8 +10,8 @@ object UserPreference : KotprefModel() {
     var showNotification by booleanPref(true, context.getString(R.string.user_preference_show_notification_key))
     var reverseWeek by booleanPref(false, context.getString(R.string.user_preference_reverse_week_key))
     var alarmSwitch by booleanPref(false , context.getString(R.string.user_preference_alarm_switch))
-    var firstLessonTime by stringPref("7:00", context.getString(R.string.user_preference_first_lesson_time))
-    var secondLessonTime by stringPref("7:00", context.getString(R.string.user_preference_second_lesson_time))
-    var thirdLessonTime by stringPref("7:00", context.getString(R.string.user_preference_third_lesson_time))
-    var fourthLessonTime by stringPref("7:00", context.getString(R.string.user_preference_fourth_lesson_time))
+    var firstLessonTime by intPref(420, context.getString(R.string.user_preference_first_lesson_time))
+    var secondLessonTime by intPref(420, context.getString(R.string.user_preference_second_lesson_time))
+    var thirdLessonTime by intPref(420, context.getString(R.string.user_preference_third_lesson_time))
+    var fourthLessonTime by intPref(420, context.getString(R.string.user_preference_fourth_lesson_time))
 }

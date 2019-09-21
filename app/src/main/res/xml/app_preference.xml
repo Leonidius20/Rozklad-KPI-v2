@@ -74,26 +74,22 @@
             app:key="@string/user_preference_alarm_switch"
             app:title="Automatic alarm clock"
             app:summary="Wakes you up depending on when your first lesson starts"/>
-        <com.goldenpiedevs.schedule.app.ui.preference.TimePickerPreference
+        <androidx.preference.Preference
             app:title="First lesson"
             app:key="@string/user_preference_first_lesson_time"
-            app:dependency="@string/user_preference_alarm_switch"
-            class = "com.goldenpiedevs.schedule.app.ui.preference.TimePickerPreference"/>
-        <com.goldenpiedevs.schedule.app.ui.preference.TimePickerPreference
+            app:dependency="@string/user_preference_alarm_switch"/>
+        <androidx.preference.Preference
             app:title="Second lesson"
             app:key="@string/user_preference_second_lesson_time"
-            app:dependency="@string/user_preference_alarm_switch"
-            class = "com.goldenpiedevs.schedule.app.ui.preference.TimePickerPreference"/>
-        <com.goldenpiedevs.schedule.app.ui.preference.TimePickerPreference
+            app:dependency="@string/user_preference_alarm_switch"/>
+        <androidx.preference.Preference
             app:title="Third lesson"
             app:key="@string/user_preference_third_lesson_time"
-            app:dependency="@string/user_preference_alarm_switch"
-            class = "com.goldenpiedevs.schedule.app.ui.preference.TimePickerPreference"/>
-        <com.goldenpiedevs.schedule.app.ui.preference.TimePickerPreference
+            app:dependency="@string/user_preference_alarm_switch"/>
+        <androidx.preference.Preference
             app:title="Forth lesson"
             app:key="@string/user_preference_fourth_lesson_time"
-            app:dependency="@string/user_preference_alarm_switch"
-            class = "com.goldenpiedevs.schedule.app.ui.preference.TimePickerPreference"/>
+            app:dependency="@string/user_preference_alarm_switch"/>
     </androidx.preference.PreferenceCategory>
 
 </androidx.preference.PreferenceScreen>
