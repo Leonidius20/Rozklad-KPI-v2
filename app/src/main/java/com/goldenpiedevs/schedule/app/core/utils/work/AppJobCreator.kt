@@ -13,6 +13,7 @@ class AppJobCreator : JobCreator {
         return when (tag) {
             ShowNotificationWork.TAG -> ShowNotificationWork()
             UpdateWidgetWork.TAG -> UpdateWidgetWork()
+            ShowAlarmWork.TAG -> ShowAlarmWork()
             else -> null
         }
     }

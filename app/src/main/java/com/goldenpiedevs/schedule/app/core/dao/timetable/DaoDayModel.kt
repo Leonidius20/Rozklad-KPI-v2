@@ -71,46 +71,52 @@ open class DaoDayModel : RealmObject() {
                     }
                 }
             }
-        }
 
-        fun saveTeacherTimeTable(key: ArrayList<DaoLessonModel>, teacherId: Int) {
-            val realm = Realm.getDefaultInstance()
+            list.groupBy { it.lessonWeek }.forEach { (_, weekLessonsList) ->
+                weekLessonsList.groupBy { it.dayNumber }.forEach { (_, dayLessonsList) ->
+                    notificationManager.createAlarmClocks(dayLessonsList.first())
+                }
+            }
 
-            key.groupBy { it.lessonWeek }.forEach { (weekNum, weekLessonsList) ->
-                weekLessonsList.asSequence().sortedBy { it.lessonNumber }.groupBy { it.dayNumber }
-                        .forEach { (dayNum, dayLessonsList) ->
-                            val model = realm.where(DaoDayModel::class.java).equalTo("parentTeacherId", teacherId)
-                                    .equalTo("dayNumber", dayNum)
-                                    .equalTo("weekNumber", weekNum).findFirst()
-                            model?.let { modelIt ->
-                                realm.executeTransaction {
-                                    modelIt.lessons.deleteAllFromRealm()
-                                    modelIt.lessons.addAll(dayLessonsList)
-                                    it.copyToRealmOrUpdate(modelIt)
-                                }
-                            } ?: run {
-                                realm.executeTransaction {
-                                    it.copyToRealmOrUpdate(DaoDayModel().apply {
-                                        lessons.addAll(dayLessonsList)
-                                        parentTeacherId = teacherId
-                                        weekNumber = weekNum
-                                        dayNumber = dayNum
-                                        dayName = dayLessonsList.first().dayName
-                                    })
+            fun saveTeacherTimeTable(key: ArrayList<DaoLessonModel>, teacherId: Int) {
+                val realm = Realm.getDefaultInstance()
+
+                key.groupBy { it.lessonWeek }.forEach { (weekNum, weekLessonsList) ->
+                    weekLessonsList.asSequence().sortedBy { it.lessonNumber }.groupBy { it.dayNumber }
+                            .forEach { (dayNum, dayLessonsList) ->
+                                val model = realm.where(DaoDayModel::class.java).equalTo("parentTeacherId", teacherId)
+                                        .equalTo("dayNumber", dayNum)
+                                        .equalTo("weekNumber", weekNum).findFirst()
+                                model?.let { modelIt ->
+                                    realm.executeTransaction {
+                                        modelIt.lessons.deleteAllFromRealm()
+                                        modelIt.lessons.addAll(dayLessonsList)
+                                        it.copyToRealmOrUpdate(modelIt)
+                                    }
+                                } ?: run {
+                                    realm.executeTransaction {
+                                        it.copyToRealmOrUpdate(DaoDayModel().apply {
+                                            lessons.addAll(dayLessonsList)
+                                            parentTeacherId = teacherId
+                                            weekNumber = weekNum
+                                            dayNumber = dayNum
+                                            dayName = dayLessonsList.first().dayName
+                                        })
+                                    }
                                 }
                             }
-                        }
+                }
+
+                val teacher = DaoTeacherModel.getManagedTeacher(teacherId, realm)!!
+
+                realm.executeTransaction {
+                    teacher.hasLoadedSchedule = true
+                    it.copyToRealmOrUpdate(teacher)
+                }
+
+                if (!realm.isClosed)
+                    realm.close()
             }
-
-            val teacher = DaoTeacherModel.getManagedTeacher(teacherId, realm)!!
-
-            realm.executeTransaction {
-                teacher.hasLoadedSchedule = true
-                it.copyToRealmOrUpdate(teacher)
-            }
-
-            if (!realm.isClosed)
-                realm.close()
         }
     }
 }

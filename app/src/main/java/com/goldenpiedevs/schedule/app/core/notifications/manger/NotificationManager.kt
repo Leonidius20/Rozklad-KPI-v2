@@ -140,4 +140,22 @@ class NotificationManager(private val context: Context) {
 
         wakeLock?.release()
     }
+
+    fun createAlarmClocks(firstLesson : DaoLessonModel) {
+        // if (!UserPreference.alarmSwitch) return
+        val timeToRing = when(firstLesson.lessonNumber) {
+            1 -> UserPreference.firstLessonTime
+            2 -> UserPreference.secondLessonTime
+            3 -> UserPreference.thirdLessonTime
+            4 -> UserPreference.fourthLessonTime
+            else -> return
+        }
+
+        val date = LocalDate.parse(firstLesson.getDayDate(), dateFormat)
+        val hours : Int = timeToRing / 60
+        val minutes : Int = timeToRing % 60
+        val alarmDateTime = LocalDateTime.of(date, LocalTime.of(hours, minutes))
+
+        // TODO: Enqueue work
+    }
 }
