@@ -21,6 +21,7 @@ import com.goldenpiedevs.schedule.app.core.dao.timetable.dateFormat
 import com.goldenpiedevs.schedule.app.core.dao.timetable.getDayDate
 import com.goldenpiedevs.schedule.app.core.utils.preference.AppPreference
 import com.goldenpiedevs.schedule.app.core.utils.preference.UserPreference
+import com.goldenpiedevs.schedule.app.core.utils.work.ShowAlarmWork
 import com.goldenpiedevs.schedule.app.core.utils.work.ShowNotificationWork
 import com.goldenpiedevs.schedule.app.ui.lesson.LessonImplementation.Companion.LESSON_ID
 import com.goldenpiedevs.schedule.app.ui.main.MainActivity
@@ -156,6 +157,12 @@ class NotificationManager(private val context: Context) {
         val minutes : Int = timeToRing % 60
         val alarmDateTime = LocalDateTime.of(date, LocalTime.of(hours, minutes))
 
-        // TODO: Enqueue work
+        var timeRemaining = ChronoUnit.MILLIS.between(LocalDateTime.now(), alarmDateTime)
+        if (timeRemaining < 0)
+            timeRemaining += TimeUnit.DAYS.toMillis(14)
+
+        // TODO("cancel previously scheduled alarms")
+
+        ShowAlarmWork.enqueueWork("", timeRemaining)
     }
 }
