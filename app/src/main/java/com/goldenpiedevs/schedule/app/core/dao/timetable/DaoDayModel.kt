@@ -57,6 +57,7 @@ open class DaoDayModel : RealmObject() {
                         realm.executeTransaction {
                             modelIt.lessons.deleteAllFromRealm()
                             modelIt.lessons.addAll(dayLessonsList)
+                            modelIt.alarmClockId = notificationManager.createAlarmClocks(dayLessonsList.first(), modelIt.uuid)
                             it.copyToRealmOrUpdate(modelIt)
                         }
 
@@ -69,6 +70,7 @@ open class DaoDayModel : RealmObject() {
                                 weekNumber = weekNum
                                 dayNumber = dayNum
                                 dayName = dayLessonsList.first().dayName
+                                alarmClockId = notificationManager.createAlarmClocks(dayLessonsList.first(), this.uuid)
                             })
 
                             notificationManager.createNotification(dayLessonsList)
@@ -77,11 +79,11 @@ open class DaoDayModel : RealmObject() {
                 }
             }
 
-            list.groupBy { it.lessonWeek }.forEach { (_, weekLessonsList) ->
+            /*list.groupBy { it.lessonWeek }.forEach { (_, weekLessonsList) ->
                 weekLessonsList.groupBy { it.dayNumber }.forEach { (_, dayLessonsList) ->
                     notificationManager.createAlarmClocks(dayLessonsList.first())
                 }
-            }
+            }*/
         }
 
         fun saveTeacherTimeTable(key: ArrayList<DaoLessonModel>, teacherId: Int) {

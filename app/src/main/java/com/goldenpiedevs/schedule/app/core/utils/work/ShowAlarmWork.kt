@@ -11,7 +11,9 @@ import java.util.concurrent.TimeUnit
 class ShowAlarmWork : Job() {
     override fun onRunJob(p0: Params): Result {
         if (UserPreference.alarmSwitch) {
-            context.startActivity(Intent(context, AlarmActivity::class.java))
+            val intent = Intent(context, AlarmActivity::class.java)
+            intent.putExtra(LESSON_NUMBER, p0.extras.getInt(LESSON_NUMBER, -1))
+            context.startActivity(intent)
         }
         return Result.SUCCESS
     }
@@ -19,10 +21,12 @@ class ShowAlarmWork : Job() {
     companion object {
         const val TAG = "ShowAlarmWork"
         private const val DAY_UUID = "day_uuid"
+        const val LESSON_NUMBER = "lesson_number"
 
-        fun enqueueWork(dayId: String, timeRemaining: Long): Int {
+        fun enqueueWork(dayId: String, timeRemaining: Long, lessonNumber : Int): Int {
             val dataBuilder = PersistableBundleCompat().apply {
                 putString(DAY_UUID, dayId)
+                putInt(LESSON_NUMBER, lessonNumber)
             }
             return JobRequest.Builder(TAG)
                     .setExtras(dataBuilder)

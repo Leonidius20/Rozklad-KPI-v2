@@ -143,22 +143,19 @@ class NotificationManager(private val context: Context) {
         wakeLock?.release()
     }
 
-    fun createAlarmClocks(firstLesson : DaoLessonModel) {
-        val jobId = scheduleAlarmClock(firstLesson)
-
-        val realm = Realm.getDefaultInstance()
-        val dayModel = realm.where(DaoDayModel::class.java).equalTo("parentGroup", AppPreference.groupName)
-                .equalTo("dayNumber", firstLesson.dayNumber)
-                .equalTo("weekNumber", firstLesson.lessonWeek).findFirst()
-        if (dayModel != null) {
+    fun createAlarmClocks(firstLesson: DaoLessonModel, dayId: String) : Int {
+        /*val realm = Realm.getDefaultInstance()
+        if (day.lessons.first() != null) {
+            val jobId = scheduleAlarmClock(day.lessons.first()!!, day.uuid)
             realm.executeTransaction {
-                dayModel.alarmClockId = jobId
-                it.copyToRealmOrUpdate(dayModel)
+                day.alarmClockId = jobId
+                it.copyToRealmOrUpdate(day)
             }
-        }
+        }*/
+        return scheduleAlarmClock(firstLesson, dayId)
     }
 
-    private fun scheduleAlarmClock(firstLesson: DaoLessonModel) : Int  {
+    private fun scheduleAlarmClock(firstLesson: DaoLessonModel, dayId : String) : Int  {
         val timeToRing = when(firstLesson.lessonNumber) {
             1 -> UserPreference.firstLessonTime
             2 -> UserPreference.secondLessonTime
@@ -176,7 +173,7 @@ class NotificationManager(private val context: Context) {
         if (timeRemaining < 0)
             timeRemaining += TimeUnit.DAYS.toMillis(14)
 
-        return ShowAlarmWork.enqueueWork("", timeRemaining)
+        return ShowAlarmWork.enqueueWork(dayId, timeRemaining, firstLesson.lessonNumber)
     }
 
     fun rescheduleAlarmClocks(lessonNumberKey : String) {
@@ -199,7 +196,7 @@ class NotificationManager(private val context: Context) {
                                     JobManager.instance().cancel(it.alarmClockId)
                                 if (it.lessons.first() != null) {
                                     realm.executeTransaction { realm ->
-                                        it.alarmClockId = scheduleAlarmClock(it.lessons.first()!!)
+                                        it.alarmClockId = scheduleAlarmClock(it.lessons.first()!!, it.uuid)
                                         realm.copyToRealmOrUpdate(it)
                                     }
                                 }
