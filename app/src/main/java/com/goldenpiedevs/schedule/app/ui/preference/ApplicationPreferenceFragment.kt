@@ -126,10 +126,13 @@ class ApplicationPreferenceFragment : PreferenceFragmentCompat(), DialogPreferen
                 val minutes = currentStoredTime % 60
                 TimePickerDialog.newInstance({ _, hourOfDay, minute, _ ->
                     val time = hourOfDay * 60 + minute
-                    UserPreference.preferences.edit().putInt(pref.key, time).apply()
+                    if (currentStoredTime != time) {
+                        UserPreference.preferences.edit().putInt(pref.key, time).apply()
+                        notificationManager.rescheduleAlarmClocks(pref.key)
+                    }
+
                     summary = formatTime(time)
                     currentStoredTime = time // updating for future launches of dialog
-                    // TODO: AlarmManager.updateAlarmClocks()
                 }, hours, minutes, true).show(childFragmentManager, "TimePickerDialog")
                 return@OnPreferenceClickListener true
             }

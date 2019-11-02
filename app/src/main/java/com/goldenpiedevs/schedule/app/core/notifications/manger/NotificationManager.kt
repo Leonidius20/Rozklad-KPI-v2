@@ -16,6 +16,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.evernote.android.job.JobManager
 import com.goldenpiedevs.schedule.app.R
+import com.goldenpiedevs.schedule.app.core.dao.timetable.DaoDayModel
 import com.goldenpiedevs.schedule.app.core.dao.timetable.DaoLessonModel
 import com.goldenpiedevs.schedule.app.core.dao.timetable.dateFormat
 import com.goldenpiedevs.schedule.app.core.dao.timetable.getDayDate
@@ -143,13 +144,27 @@ class NotificationManager(private val context: Context) {
     }
 
     fun createAlarmClocks(firstLesson : DaoLessonModel) {
-        // if (!UserPreference.alarmSwitch) return
+        val jobId = scheduleAlarmClock(firstLesson)
+
+        val realm = Realm.getDefaultInstance()
+        val dayModel = realm.where(DaoDayModel::class.java).equalTo("parentGroup", AppPreference.groupName)
+                .equalTo("dayNumber", firstLesson.dayNumber)
+                .equalTo("weekNumber", firstLesson.lessonWeek).findFirst()
+        if (dayModel != null) {
+            realm.executeTransaction {
+                dayModel.alarmClockId = jobId
+                it.copyToRealmOrUpdate(dayModel)
+            }
+        }
+    }
+
+    private fun scheduleAlarmClock(firstLesson: DaoLessonModel) : Int  {
         val timeToRing = when(firstLesson.lessonNumber) {
             1 -> UserPreference.firstLessonTime
             2 -> UserPreference.secondLessonTime
             3 -> UserPreference.thirdLessonTime
             4 -> UserPreference.fourthLessonTime
-            else -> return
+            else -> return -1
         }
 
         val date = LocalDate.parse(firstLesson.getDayDate(), dateFormat)
@@ -161,8 +176,34 @@ class NotificationManager(private val context: Context) {
         if (timeRemaining < 0)
             timeRemaining += TimeUnit.DAYS.toMillis(14)
 
-        // TODO("cancel previously scheduled alarms")
+        return ShowAlarmWork.enqueueWork("", timeRemaining)
+    }
 
-        ShowAlarmWork.enqueueWork("", timeRemaining)
+    fun rescheduleAlarmClocks(lessonNumberKey : String) {
+        val lessonNumber = when(lessonNumberKey) {
+            context.getString(R.string.user_preference_first_lesson_time) -> 1
+            context.getString(R.string.user_preference_second_lesson_time) -> 2
+            context.getString(R.string.user_preference_third_lesson_time) -> 3
+            context.getString(R.string.user_preference_fourth_lesson_time) -> 4
+            else -> return
+        }
+
+        val realm = Realm.getDefaultInstance()
+        realm.where(DaoDayModel::class.java).equalTo("parentGroup", AppPreference.groupName)
+            .findAll()
+            .also { results ->
+                results.forEach {
+                    if (it.lessons.first()?.lessonNumber == lessonNumber) {
+                        if (it.alarmClockId != -1)
+                            JobManager.instance().cancel(it.alarmClockId)
+                        if (it.lessons.first() != null) {
+                            realm.executeTransaction { realm ->
+                                it.alarmClockId = scheduleAlarmClock(it.lessons.first()!!)
+                                realm.copyToRealmOrUpdate(it)
+                            }
+                        }
+                    }
+                }
+            }
     }
 }

@@ -23,6 +23,7 @@ open class DaoDayModel : RealmObject() {
     var lessons: RealmList<DaoLessonModel> = RealmList()
     var parentGroup = ""
     var parentTeacherId = -1
+    var alarmClockId = -1
 
     companion object {
 
@@ -35,6 +36,10 @@ open class DaoDayModel : RealmObject() {
                             .equalTo("parentGroup", groupName)
                             .findAll()
                             .also { results ->
+                                results.forEach {
+                                    if (it.alarmClockId != -1)
+                                        JobManager.instance().cancel(it.alarmClockId)
+                                }
                                 results.map { it.lessons }.flatten().forEach {
                                     if (it.notificationId != -1)
                                         JobManager.instance().cancel(it.notificationId)
