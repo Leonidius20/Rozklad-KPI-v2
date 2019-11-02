@@ -180,30 +180,32 @@ class NotificationManager(private val context: Context) {
     }
 
     fun rescheduleAlarmClocks(lessonNumberKey : String) {
-        val lessonNumber = when(lessonNumberKey) {
-            context.getString(R.string.user_preference_first_lesson_time) -> 1
-            context.getString(R.string.user_preference_second_lesson_time) -> 2
-            context.getString(R.string.user_preference_third_lesson_time) -> 3
-            context.getString(R.string.user_preference_fourth_lesson_time) -> 4
-            else -> return
-        }
+        GlobalScope.launch {
+            val lessonNumber = when (lessonNumberKey) {
+                context.getString(R.string.user_preference_first_lesson_time) -> 1
+                context.getString(R.string.user_preference_second_lesson_time) -> 2
+                context.getString(R.string.user_preference_third_lesson_time) -> 3
+                context.getString(R.string.user_preference_fourth_lesson_time) -> 4
+                else -> return@launch
+            }
 
-        val realm = Realm.getDefaultInstance()
-        realm.where(DaoDayModel::class.java).equalTo("parentGroup", AppPreference.groupName)
-            .findAll()
-            .also { results ->
-                results.forEach {
-                    if (it.lessons.first()?.lessonNumber == lessonNumber) {
-                        if (it.alarmClockId != -1)
-                            JobManager.instance().cancel(it.alarmClockId)
-                        if (it.lessons.first() != null) {
-                            realm.executeTransaction { realm ->
-                                it.alarmClockId = scheduleAlarmClock(it.lessons.first()!!)
-                                realm.copyToRealmOrUpdate(it)
+            val realm = Realm.getDefaultInstance()
+            realm.where(DaoDayModel::class.java).equalTo("parentGroup", AppPreference.groupName)
+                    .findAll()
+                    .also { results ->
+                        results.forEach {
+                            if (it.lessons.first()?.lessonNumber == lessonNumber) {
+                                if (it.alarmClockId != -1)
+                                    JobManager.instance().cancel(it.alarmClockId)
+                                if (it.lessons.first() != null) {
+                                    realm.executeTransaction { realm ->
+                                        it.alarmClockId = scheduleAlarmClock(it.lessons.first()!!)
+                                        realm.copyToRealmOrUpdate(it)
+                                    }
+                                }
                             }
                         }
                     }
-                }
-            }
+        }
     }
 }

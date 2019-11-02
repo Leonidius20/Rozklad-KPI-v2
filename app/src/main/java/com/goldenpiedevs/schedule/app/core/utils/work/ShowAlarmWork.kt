@@ -20,13 +20,13 @@ class ShowAlarmWork : Job() {
         const val TAG = "ShowAlarmWork"
         private const val DAY_UUID = "day_uuid"
 
-        fun enqueueWork(dayId: String, timeToNotify: Long): Int {
+        fun enqueueWork(dayId: String, timeRemaining: Long): Int {
             val dataBuilder = PersistableBundleCompat().apply {
                 putString(DAY_UUID, dayId)
             }
             return JobRequest.Builder(TAG)
                     .setExtras(dataBuilder)
-                    .setPeriodic(TimeUnit.DAYS.toMillis(14), timeToNotify)
+                    .setPeriodic(TimeUnit.DAYS.toMillis(14), timeRemaining)
                     .build()
                     .schedule()
         }
