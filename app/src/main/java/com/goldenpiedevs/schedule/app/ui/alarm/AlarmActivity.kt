@@ -1,8 +1,9 @@
 package com.goldenpiedevs.schedule.app.ui.alarm
 
-import android.os.Bundle
-import com.goldenpiedevs.schedule.app.ui.base.BaseActivity
 import android.media.RingtoneManager
+import android.os.Bundle
+import com.goldenpiedevs.schedule.app.R
+import com.goldenpiedevs.schedule.app.ui.base.BaseActivity
 
 class AlarmActivity : BaseActivity<AlarmPresenter, AlarmView>(), AlarmView {
 
@@ -19,6 +20,6 @@ class AlarmActivity : BaseActivity<AlarmPresenter, AlarmView>(), AlarmView {
     override fun getPresenterChild(): AlarmPresenter = presenter
 
     override fun getActivityLayout(): Int {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return R.layout.alarm_activity_layout
     }
 }

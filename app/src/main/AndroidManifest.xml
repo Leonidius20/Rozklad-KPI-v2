@@ -38,6 +38,8 @@
             android:name=".ui.preference.PreferenceActivity"
             android:label="@string/settings"
             android:theme="@style/AppTheme.SwipeBack" />
+        <activity android:name=".ui.alarm.AlarmActivity"
+                  android:exported="true"/>
 
         <meta-data
             android:name="io.fabric.ApiKey"
