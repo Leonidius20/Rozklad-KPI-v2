@@ -1,0 +1,2 @@
+-keep class androidx.appcompat.** { *; }
+-keep class io.github.inflationx.calligraphy3.** { *; }
