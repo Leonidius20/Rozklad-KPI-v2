@@ -7,6 +7,7 @@ import android.os.Handler
 import androidx.preference.*
 import com.goldenpiedevs.schedule.app.R
 import com.goldenpiedevs.schedule.app.ScheduleApplication
+import com.goldenpiedevs.schedule.app.core.alarm.manager.AlarmManager
 import com.goldenpiedevs.schedule.app.core.api.lessons.LessonsManager
 import com.goldenpiedevs.schedule.app.core.api.teachers.TeachersManager
 import com.goldenpiedevs.schedule.app.core.dao.timetable.DaoLessonModel
@@ -36,6 +37,8 @@ class ApplicationPreferenceFragment : PreferenceFragmentCompat(), DialogPreferen
     lateinit var lessonsManager: LessonsManager
     @Inject
     lateinit var teachersManager: TeachersManager
+    @Inject
+    lateinit var alarmManager: AlarmManager
 
     companion object {
         const val CHANGE_GROUP_CODE = 565
@@ -103,7 +106,9 @@ class ApplicationPreferenceFragment : PreferenceFragmentCompat(), DialogPreferen
 
         findPreference<SwitchPreferenceCompat>(getString(R.string.user_preference_alarm_switch))!!.apply {
             onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, value ->
-                // TODO ("Schedule or cancel alarm clocks in AlarmClockManager")
+                if (value as Boolean) {
+                    alarmManager.scheduleAllAlarms(AppPreference.groupName)
+                } else alarmManager.cancelAlarmClocks()
                 return@OnPreferenceChangeListener true
             }
         }
@@ -128,7 +133,7 @@ class ApplicationPreferenceFragment : PreferenceFragmentCompat(), DialogPreferen
                     val time = hourOfDay * 60 + minute
                     if (currentStoredTime != time) {
                         UserPreference.preferences.edit().putInt(pref.key, time).apply()
-                        notificationManager.rescheduleAlarmClocks(pref.key)
+                        alarmManager.rescheduleAlarmClocks(pref.key)
                     }
 
                     summary = formatTime(time)

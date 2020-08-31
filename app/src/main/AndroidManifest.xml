@@ -40,6 +40,10 @@
             android:theme="@style/AppTheme.SwipeBack" />
         <activity android:name=".ui.alarm.AlarmActivity"
                   android:exported="true"/>
+        <activity android:name=".ui.test.AlarmTestActivity"
+                  android:exported="true"
+            android:label="AlarmTest">
+        </activity>
 
         <meta-data
             android:name="io.fabric.ApiKey"

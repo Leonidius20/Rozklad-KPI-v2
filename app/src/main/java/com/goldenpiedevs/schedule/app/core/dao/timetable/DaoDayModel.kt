@@ -1,6 +1,7 @@
 package com.goldenpiedevs.schedule.app.core.dao.timetable
 
 import com.evernote.android.job.JobManager
+import com.goldenpiedevs.schedule.app.core.alarm.manager.AlarmManager
 import com.goldenpiedevs.schedule.app.core.notifications.manger.NotificationManager
 import com.google.gson.annotations.SerializedName
 import io.realm.Realm
@@ -27,7 +28,9 @@ open class DaoDayModel : RealmObject() {
 
     companion object {
 
-        fun saveGroupTimeTable(list: ArrayList<DaoLessonModel>, groupName: String, notificationManager: NotificationManager) {
+        fun saveGroupTimeTable(list: ArrayList<DaoLessonModel>, groupName: String,
+                               notificationManager: NotificationManager,
+                               alarmManager: AlarmManager) {
             val realm = Realm.getDefaultInstance()
 
             if (list.isNotEmpty())
@@ -50,14 +53,16 @@ open class DaoDayModel : RealmObject() {
 
             list.groupBy { it.lessonWeek }.forEach { (weekNum, weekLessonsList) ->
                 weekLessonsList.asSequence().sortedBy { it.lessonNumber }.groupBy { it.dayNumber }.forEach { (dayNum, dayLessonsList) ->
-                    val model = realm.where(DaoDayModel::class.java).equalTo("parentGroup", groupName)
+                    val dayModel = realm.where(DaoDayModel::class.java)
+                            .equalTo("parentGroup", groupName)
                             .equalTo("dayNumber", dayNum)
                             .equalTo("weekNumber", weekNum).findFirst()
-                    model?.let { modelIt ->
+                    dayModel?.let { modelIt ->
                         realm.executeTransaction {
                             modelIt.lessons.deleteAllFromRealm()
                             modelIt.lessons.addAll(dayLessonsList)
-                            modelIt.alarmClockId = notificationManager.createAlarmClocks(dayLessonsList.first(), modelIt.uuid)
+                            //modelIt.alarmClockId =
+                            //        alarmManager.createAlarmClock(dayLessonsList.first(), modelIt.uuid)
                             it.copyToRealmOrUpdate(modelIt)
                         }
 
@@ -70,7 +75,8 @@ open class DaoDayModel : RealmObject() {
                                 weekNumber = weekNum
                                 dayNumber = dayNum
                                 dayName = dayLessonsList.first().dayName
-                                alarmClockId = notificationManager.createAlarmClocks(dayLessonsList.first(), this.uuid)
+                                //alarmClockId =
+                                //        alarmManager.createAlarmClock(dayLessonsList.first(), this.uuid)
                             })
 
                             notificationManager.createNotification(dayLessonsList)
@@ -79,11 +85,7 @@ open class DaoDayModel : RealmObject() {
                 }
             }
 
-            /*list.groupBy { it.lessonWeek }.forEach { (_, weekLessonsList) ->
-                weekLessonsList.groupBy { it.dayNumber }.forEach { (_, dayLessonsList) ->
-                    notificationManager.createAlarmClocks(dayLessonsList.first())
-                }
-            }*/
+            alarmManager.scheduleAllAlarms(list, groupName)
         }
 
         fun saveTeacherTimeTable(key: ArrayList<DaoLessonModel>, teacherId: Int) {

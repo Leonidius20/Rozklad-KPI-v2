@@ -1,6 +1,7 @@
 package com.goldenpiedevs.schedule.app.core.injection.module
 
 import android.content.Context
+import com.goldenpiedevs.schedule.app.core.alarm.manager.AlarmManager
 import com.goldenpiedevs.schedule.app.core.notifications.manger.NotificationManager
 import dagger.Module
 import dagger.Provides
@@ -11,4 +12,9 @@ object ExtrasModule {
     @Provides
     @Reusable
     fun provideNotificationManager(context: Context) = NotificationManager(context)
+
+    @Provides
+    @Reusable
+    fun provideAlarmManager(context: Context) = AlarmManager(context)
+
 }

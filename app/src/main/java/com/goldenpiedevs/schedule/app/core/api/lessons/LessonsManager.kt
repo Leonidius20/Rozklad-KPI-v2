@@ -2,6 +2,7 @@ package com.goldenpiedevs.schedule.app.core.api.lessons
 
 import android.content.Context
 import com.goldenpiedevs.schedule.app.R
+import com.goldenpiedevs.schedule.app.core.alarm.manager.AlarmManager
 import com.goldenpiedevs.schedule.app.core.api.group.GroupManager
 import com.goldenpiedevs.schedule.app.core.dao.timetable.DaoDayModel
 import com.goldenpiedevs.schedule.app.core.dao.timetable.DaoTeacherModel
@@ -14,7 +15,11 @@ import com.goldenpiedevs.schedule.app.core.utils.util.isNetworkAvailable
 import kotlinx.coroutines.*
 import org.jetbrains.anko.toast
 
-class LessonsManager(private val context: Context, private val lessonsService: LessonsService, private val groupManager: GroupManager, private val notificationManager: NotificationManager) {
+class LessonsManager(private val context: Context,
+                     private val lessonsService: LessonsService,
+                     private val groupManager: GroupManager,
+                     private val notificationManager: NotificationManager,
+                     private val alarmManager: AlarmManager) {
     fun loadTimeTableAsync(groupName: String): Deferred<Boolean> = GlobalScope.async {
         val response = lessonsService.getGroupTimeTable(groupName).await()
 
@@ -22,7 +27,8 @@ class LessonsManager(private val context: Context, private val lessonsService: L
             val group = groupManager.getGroupInfoAsync(groupName).await()
 
             response.body()?.let {
-                DaoDayModel.saveGroupTimeTable(it.data!!, group!!.groupFullName, notificationManager)
+                DaoDayModel.saveGroupTimeTable(it.data!!,
+                        group!!.groupFullName, notificationManager, alarmManager)
             } ?: return@async false
 
             AppPreference.apply {
