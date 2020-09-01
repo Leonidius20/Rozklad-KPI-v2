@@ -1,6 +1,7 @@
 package com.goldenpiedevs.schedule.app.core.injection.component
 
 import com.goldenpiedevs.schedule.app.core.injection.module.*
+import com.goldenpiedevs.schedule.app.core.utils.work.ShowAlarmWork
 import com.goldenpiedevs.schedule.app.core.utils.work.ShowNotificationWork
 import com.goldenpiedevs.schedule.app.ui.choose.group.ChooseGroupImplementation
 import com.goldenpiedevs.schedule.app.ui.lesson.LessonImplementation
@@ -23,4 +24,5 @@ interface AppComponent {
     fun inject(showNotificationWork: ShowNotificationWork)
     fun inject(applicationPreferenceFragment: ApplicationPreferenceFragment)
     fun inject(teachersImplementation: TeachersImplementation)
+    fun inject(showAlarmWork: ShowAlarmWork)
 }

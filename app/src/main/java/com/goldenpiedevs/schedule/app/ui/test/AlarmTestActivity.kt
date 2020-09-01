@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit
 class AlarmTestActivity : Activity() {
 
     private var jobId = -1
+    private var instantJobId = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,9 +24,14 @@ class AlarmTestActivity : Activity() {
     }
 
     fun startNow(view: View) {
-        startActivity(Intent(this, AlarmActivity::class.java).apply {
-            putExtra(ShowAlarmWork.LESSON_NUMBER, 1)
-        })
+        val dataBuilder = PersistableBundleCompat().apply {
+            putInt(ShowAlarmWork.LESSON_NUMBER, 1)
+        }
+        instantJobId = JobRequest.Builder(ShowAlarmWork.TAG)
+                .setExtras(dataBuilder)
+                .startNow()
+                .build()
+                .schedule()
     }
 
     fun schedule(view: View) {
@@ -38,14 +44,7 @@ class AlarmTestActivity : Activity() {
             putInt(LESSON_NUMBER, 1)
         }
 
-        jobId = JobRequest.Builder(TAG)
-                .setExtras(dataBuilder)
-                .setPeriodic(
-                        TimeUnit.MINUTES.toMillis(periodTextView.text.toString().toLong()),
-                        TimeUnit.MINUTES.toMillis(flexMSTextView.text.toString().toLong()))
-                // .setPersisted(true)
-                .build()
-                .schedule()
+        // TODO("Make it repeat not every 14 days, but every few seconds for testing")
 
     }
 
@@ -53,5 +52,8 @@ class AlarmTestActivity : Activity() {
         JobManager.instance().cancel(jobId)
     }
 
+    override fun onDestroy() {
+        JobManager.instance().cancel(instantJobId)
+    }
 
 }

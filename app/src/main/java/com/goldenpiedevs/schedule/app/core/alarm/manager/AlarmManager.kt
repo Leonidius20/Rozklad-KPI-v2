@@ -1,6 +1,7 @@
 package com.goldenpiedevs.schedule.app.core.alarm.manager
 
 import android.content.Context
+import android.content.Intent
 import com.evernote.android.job.JobManager
 import com.goldenpiedevs.schedule.app.R
 import com.goldenpiedevs.schedule.app.core.dao.group.DaoGroupModel
@@ -11,6 +12,7 @@ import com.goldenpiedevs.schedule.app.core.dao.timetable.getDayDate
 import com.goldenpiedevs.schedule.app.core.utils.preference.AppPreference
 import com.goldenpiedevs.schedule.app.core.utils.preference.UserPreference
 import com.goldenpiedevs.schedule.app.core.utils.work.ShowAlarmWork
+import com.goldenpiedevs.schedule.app.ui.alarm.AlarmActivity
 import io.realm.Realm
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -29,7 +31,7 @@ class AlarmManager(private val context: Context) {
      * Creates an alarm clock for a specified day
      * @see com.goldenpiedevs.schedule.app.core.dao.timetable.DaoDayModel.saveGroupTimeTable
      */
-    fun createAlarmClock(firstLesson: DaoLessonModel, dayId: String): Int {
+    private fun createAlarmClock(firstLesson: DaoLessonModel, dayId: String): Int {
         /*val realm = Realm.getDefaultInstance()
         if (day.lessons.first() != null) {
             val jobId = scheduleAlarmClock(day.lessons.first()!!, day.uuid)
@@ -59,7 +61,7 @@ class AlarmManager(private val context: Context) {
         if (timeRemaining < 0)
             timeRemaining += TimeUnit.DAYS.toMillis(14)
 
-        return ShowAlarmWork.enqueueWork(dayId, timeRemaining, firstLesson.lessonNumber)
+        return ShowAlarmWork.enqueueWork(timeRemaining, firstLesson.lessonNumber)
     }
 
     /**
@@ -160,6 +162,29 @@ class AlarmManager(private val context: Context) {
                 }
 
             }
+        }
+    }
+
+    /**
+     * Shows AlarmActivity. Called from ShowAlarmWork
+     * @see com.goldenpiedevs.schedule.app.core.utils.work.ShowAlarmWork
+     * Code may be partially copied from NotificationManager.showNotification
+     * @see com.goldenpiedevs.schedule.app.core.notifications.manger.NotificationManager.showNotification
+     */
+    fun showAlarmScreen(lessonNumber: Int) {
+        // repeat after two weeks
+        ShowAlarmWork.enqueueWork(TimeUnit.DAYS.toMillis(14), lessonNumber)
+
+        if (
+                // lessonModel.groupId != AppPreference.groupId.toString() ||
+                !UserPreference.alarmSwitch)
+            return
+
+        if (UserPreference.alarmSwitch) {
+            val intent = Intent(context, AlarmActivity::class.java)
+            intent.putExtra(ShowAlarmWork.LESSON_NUMBER, lessonNumber)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            context.startActivity(intent)
         }
     }
 
