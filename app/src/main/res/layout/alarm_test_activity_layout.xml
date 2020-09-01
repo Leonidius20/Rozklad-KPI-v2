@@ -8,20 +8,27 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/periodTextView"
-            android:hint="Period"/>
+            android:hint="Period (in minutes) >= 15 aka every X minutes"/>
     <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/flexMSTextView"
-            android:hint="FlexMS"/>
+            android:hint="FlexMS (in minutes) >= 5 before the first time"/>
     <Button android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="schedule"
-            android:id="@+id/scheduleJobButton"/>
+            android:id="@+id/scheduleJobButton"
+        android:onClick="schedule"/>
     <Button android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/startNowButton"
             android:text="start now"
         android:onClick="startNow"/>
+
+    <Button android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/cancel_button"
+        android:text="start now"
+        android:onClick="cancel"/>
 
 </LinearLayout>
