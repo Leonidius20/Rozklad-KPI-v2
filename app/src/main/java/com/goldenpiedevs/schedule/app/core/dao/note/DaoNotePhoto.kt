@@ -18,10 +18,10 @@ open class DaoNotePhoto() : RealmObject(), Parcelable {
     var name: String = ""
 
     constructor(parcel: Parcel) : this() {
-        key = parcel.readString()
+        key = parcel.readString()!!
         id = parcel.readLong()
-        path = parcel.readString()
-        name = parcel.readString()
+        path = parcel.readString()!!
+        name = parcel.readString()!!
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {

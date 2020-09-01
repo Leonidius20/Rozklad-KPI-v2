@@ -31,6 +31,7 @@ class ShowAlarmWork : Job() {
             return JobRequest.Builder(TAG)
                     .setExtras(dataBuilder)
                     .setPeriodic(TimeUnit.DAYS.toMillis(14), timeRemaining)
+                    // .setPersisted(true)
                     .build()
                     .schedule()
         }

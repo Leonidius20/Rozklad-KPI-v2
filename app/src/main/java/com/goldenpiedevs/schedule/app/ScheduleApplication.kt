@@ -14,9 +14,9 @@ import com.goldenpiedevs.schedule.app.core.utils.work.AppJobCreator
 import com.goldenpiedevs.schedule.app.core.utils.work.UpdateWidgetWork
 import com.jakewharton.threetenabp.AndroidThreeTen
 import io.fabric.sdk.android.Fabric
-// import io.github.inflationx.calligraphy3.CalligraphyConfig
-// import io.github.inflationx.calligraphy3.CalligraphyInterceptor
-// import io.github.inflationx.viewpump.ViewPump
+import io.github.inflationx.calligraphy3.CalligraphyConfig
+import io.github.inflationx.calligraphy3.CalligraphyInterceptor
+import io.github.inflationx.viewpump.ViewPump
 import io.realm.Realm
 import io.realm.RealmConfiguration
 
@@ -61,13 +61,13 @@ class ScheduleApplication : MultiDexApplication() {
             UserPreference.clear()
         }
 
-        //ViewPump.init(ViewPump.builder()
-        //        .addInterceptor(CalligraphyInterceptor(
-        //                CalligraphyConfig.Builder()
-        //                        .setDefaultFontPath("fonts/ProductSansRegular.ttf")
-        //                        .setFontAttrId(R.attr.fontPath)
-        //                        .build()))
-        //        .build())
+        ViewPump.init(ViewPump.builder()
+                .addInterceptor(CalligraphyInterceptor(
+                        CalligraphyConfig.Builder()
+                                .setDefaultFontPath("fonts/ProductSansRegular.ttf")
+                                .setFontAttrId(R.attr.fontPath)
+                                .build()))
+                .build())
     }
 
     private fun initDagger() =
